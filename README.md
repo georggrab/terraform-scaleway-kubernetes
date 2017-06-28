@@ -29,11 +29,11 @@ About the Cluster we'll create: *(not yet implemented, coming soon)*
 
 * The Master Node will also be the Cluster Ingress (handle incoming traffic)
 * These `kube-system` services will be installed: 
-* - Kubernetes Dashboard for easy monitoring
-* - nginx-ingress-controller for handling ingress
-* - kube-lego for provisioning Letsencrypt certificates dynamically
+  * [Kubernetes Dashboard](https://github.com/kubernetes/dashboard) for easy monitoring
+  * [nginx-ingress-controller](https://github.com/kubernetes/ingress/tree/master/controllers/nginx) for handling incoming traffic
+  * [kube-lego](https://github.com/jetstack/kube-lego) for provisioning Letsencrypt certificates dynamically
 
-Of course, you can just skip the cluster creation step by setting `install_kubernetes_services` to false in `terraform.tfvars`. 
+Of course, you can just skip the cluster creation step by setting `install_kubernetes_services` to false in `terraform.tfvars` for full control. If you do that, you'll basically be at step 3 of the [official kubeadm tutorial](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#pod-network), except the _joining your nodes_ part, which has already been done for you. Once you installed the Pod Network of your choice, your cluster will be ready
 
 ## Caveats
 
@@ -44,3 +44,30 @@ This is in heavy development, the following things are to consider for now befor
 * No storage solution yet
 
 # Setup
+
+These are the required Variables you'll have to change in `terraform.tfvars`:
+
+```bash
+# Your Scaleway Access Key
+scaleway_organization = "<access key here>"
+
+# A Scaleway token associated with your account
+scaleway_token = "<some token here>"
+
+# Set this to the location of the SSH Key that is associated
+# with your Scaleway account.
+ssh_key = "/path/to/id_rsa"
+
+# Fill in your Cloudflare Auth Information here
+cloudflare_token = "<your cloudflare token>"
+cloudflare_email = "<your cloudflare email>"
+domain = "<your cloudflare managed domain>"
+```
+
+After you've changed these settings, generate a Token which `kubeadm` will use to authenticate nodes to the cluster:
+
+```bash
+$ ./scripts/generate-kubeadm-token.sh
+```
+
+Then, do `terraform plan` and `terraform apply` and hope for the best :D

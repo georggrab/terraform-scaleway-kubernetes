@@ -9,6 +9,11 @@ variable "node_prefix" {}
 variable "redirect_domain_to_master" {}
 variable "ssh_key" {}
 variable "kube_token" {}
+variable "attach_volumes_to_nodes" {}
+variable "volume_size" {}
+variable "machine_type" {}
+
+// Machine Configuration
 
 provider "scaleway" {
    token = "${var.scaleway_token}"
@@ -38,6 +43,8 @@ module "create-kube-masters" {
     count = 1
 
     security_group_id = "${module.scaleway_security.group_id}"
+
+    machine_type = "${var.machine_type}"
 }
 
 module "create-kube-nodes" {
@@ -49,6 +56,17 @@ module "create-kube-nodes" {
 
     security_group_id = "${module.scaleway_security.group_id}"
 }
+
+module "create-kube-nodes-data" {
+    source = "./scaleway/volume"
+
+    for_servers = "${module.create-kube-nodes.vm_ids}"
+    volume_size = "${var.volume_size}"
+    enabled = "${var.attach_volumes_to_nodes}"
+    count = "${var.kubernetes_node_count}"
+}
+
+// DNS Configuration
 
 module "assign-master-hostname" {
     source = "./cloudflare/machine-records"
@@ -74,6 +92,8 @@ module "assign-node-hostname" {
     ipv4_addresses = "${module.create-kube-nodes.vm_ips}"
     count = "${var.kubernetes_node_count}"
 }
+
+// Kubernetes Configuration
 
 module "deploy-kube-master" {
     source = "./kubernetes/master"

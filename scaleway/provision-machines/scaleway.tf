@@ -8,8 +8,7 @@ resource "scaleway_server" "kube-node" {
 
    image = "${data.scaleway_image.ubuntu.id}"
    
-   # 2 X86_64 Cores, 2 GB Memory, 2,99€/Month
-   type = "VC1S"
+   type = "${var.machine_type}"
 
    security_group = "${var.security_group_id}"
 
@@ -37,6 +36,6 @@ output "vm_ips" {
     value = ["${scaleway_server.kube-node.*.public_ip}"]
 }
 
-#output "vm_indices" {
-#    value = ["${scaleway_server.kube-node.*.tags.0}"]
-#}
+output "vm_ids" {
+    value = ["${scaleway_server.kube-node.*.id}"]
+}

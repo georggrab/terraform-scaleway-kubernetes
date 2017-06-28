@@ -13,7 +13,10 @@ resource "null_resource" "deploy-master" {
 
     provisioner "remote-exec" {
         inline = [
-            "kubeadm init --token ${var.kube_token} --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address ${var.kube_apiserver_advertise_ip}"
+            "kubeadm init --token ${var.kube_token} --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address ${var.kube_apiserver_advertise_ip}",
+            "cp /etc/kubernetes/admin.conf $HOME/",
+            "chown $(id -u):$(id -g) $HOME/admin.conf",
+            "export KUBECONFIG=$HOME/admin.conf"
         ]
     }
 }
